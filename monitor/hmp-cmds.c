@@ -59,6 +59,10 @@
 #include "hw/intc/intc.h"
 #include "migration/snapshot.h"
 #include "migration/misc.h"
+//#include "exec/ramlist.h"
+#include <stdlib.h>
+#include "exec/cpu-common.h"
+
 
 #ifdef CONFIG_SPICE
 #include <spice/enums.h>
@@ -895,6 +899,57 @@ void hmp_quit(Monitor *mon, const QDict *qdict)
 void hmp_stop(Monitor *mon, const QDict *qdict)
 {
     qmp_stop(NULL);
+}
+
+void hmp_memsearch(Monitor* mon, const QDict* qdict) {
+    //RAMBlock *qemu_ram_block_from_host(void *ptr, bool round_offset,
+    //                               ram_addr_t *offset)
+    const char* searchterm = qdict_get_str(qdict, "name");
+    RAMBlock* block;
+    ram_addr_t offset;
+
+    unsigned long ptr = strtoul(searchterm, 16);
+    block = qemu_ram_block_from_host((void*)ptr, false, &offset);
+    monitor_printf(mon, "Found block %zu with offset %zu\n", block, offset);
+    /*size_t len = strlen(searchterm);
+    size_t count = 0;
+    size_t match = 0;
+    RAMBlock* block;
+
+    monitor_printf(mon, "Freezing emulation ...\n");
+    hmp_stop(mon, qdict);
+
+    monitor_printf(mon, "Searching for '%s' ...\n", searchterm);
+    block = qatomic_rcu_read(&ram_list.mru_block);
+    RAMBLOCK_FOREACH(block) {
+        count++;
+
+        if (block->host == NULL) {
+            continue;
+        }
+
+        //uint64_t readptr = block->mr->ops->read();
+        for (size_t i = 0; i < block->mr->size; i++) {
+            if (searchterm[match] == block->mr->opaque[i]) {
+                if (match == len) {
+                    monitor_printf(mon, "Found it at: block %zu, offset %zu\n", count - 1, i);
+                    monitor_printf(mon, "Unfreezing emulation ...\n");
+                    hmp_cont(mon, qdict);
+                    return;
+                }
+
+                monitor_printf(mon, "m");
+                match++;
+            } else {
+                monitor_printf(mon, "|");
+                match = 0;
+            }
+        }
+    }
+
+    monitor_printf(mon, "Sorry, searchterm not found.\n");*/
+    //monitor_printf(mon, "Unfreezing emulation ...\n");
+    //hmp_cont(mon, qdict);
 }
 
 void hmp_sync_profile(Monitor *mon, const QDict *qdict)

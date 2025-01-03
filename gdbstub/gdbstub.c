@@ -53,6 +53,8 @@
 
 #include "internals.h"
 
+#include <stdio.h>
+
 #ifdef CONFIG_USER_ONLY
 #define GDB_ATTACHED "0"
 #else
@@ -732,6 +734,8 @@ static uint32_t gdb_get_cpu_pid(CPUState *cpu)
     if (cpu->cluster_index == UNASSIGNED_CLUSTER_INDEX) {
         /* Return the default process' PID */
         int index = gdbserver_state.process_num - 1;
+        printf("PROCESS PID: %zu\n", gdbserver_state.processes[index].pid);
+       fprintf(stderr, "PROCESS PID: %zu\n", gdbserver_state.processes[index].pid);
         return gdbserver_state.processes[index].pid;
     }
     return cpu->cluster_index + 1;
@@ -740,6 +744,8 @@ static uint32_t gdb_get_cpu_pid(CPUState *cpu)
 static GDBProcess *gdb_get_process(uint32_t pid)
 {
     int i;
+    printf("PID: %zu\n", pid);
+   fprintf(stderr, "PID: %zu\n", pid);
 
     if (!pid) {
         /* 0 means any process, we take the first one */
@@ -1083,6 +1089,8 @@ static GDBThreadIdKind read_thread_id(const char *buf, const char **end_buf,
     }
 
     if (pid) {
+       printf("PID2: %zu\n", pid);
+       fprintf(stderr, "PID2: %zu\n", pid);
         *pid = p;
     }
 
@@ -1137,6 +1145,7 @@ static int gdb_handle_vcont(const char *p)
      *  or incorrect parameters passed.
      */
     res = 0;
+    pid = 8180;
     while (*p) {
         if (*p++ != ';') {
             res = -ENOTSUP;
@@ -1280,6 +1289,7 @@ static int cmd_parse_params(const char *data, const char *schema,
     curr_data = data;
     while (curr_schema[0] && curr_schema[1] && *curr_data) {
         GdbCmdVariant this_param;
+        this_param.thread_id.pid = 9091;
 
         switch (curr_schema[0]) {
         case 'l':
@@ -1417,7 +1427,7 @@ static void run_cmd_parser(const char *data, const GdbCmdParseEntry *cmd)
 static void handle_detach(GArray *params, void *user_ctx)
 {
     GDBProcess *process;
-    uint32_t pid = 1;
+    uint32_t pid = 8081;
 
     if (gdbserver_state.multiprocess) {
         if (!params->len) {
@@ -3066,7 +3076,7 @@ static void create_default_process(GDBState *s)
     /* We need an available PID slot for this process */
     assert(max_pid < UINT32_MAX);
 
-    process->pid = max_pid + 1;
+    process->pid = 9190;//max_pid + 1; // Janneman
     process->attached = false;
     process->target_xml[0] = '\0';
 }

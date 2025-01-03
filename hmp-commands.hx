@@ -445,6 +445,18 @@ SRST
 ERST
 
     {
+        .name       = "memsearch",
+        .args_type  = "name:s",
+        .params     = "address",
+        .help       = "Search in memoryregions for specified string",
+        .cmd        = hmp_memsearch,
+    },
+SRST
+``memsearch`` *address*
+  Search in memoryregions for specified string
+ERST
+
+    {
         .name       = "x",
         .args_type  = "fmt:/,addr:l",
         .params     = "/fmt addr",
